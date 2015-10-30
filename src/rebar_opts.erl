@@ -111,7 +111,9 @@ merge_opts(NewOpts, OldOpts) ->
                        NewValue;
                   (profiles, NewValue, OldValue) ->
                        dict:to_list(merge_opts(dict:from_list(NewValue), dict:from_list(OldValue)));
-                  (_Key, NewValue, OldValue) when is_list(NewValue) ->
+                  (mib_first_files, NewValue, _OldValue) ->
+                       NewValue;
+                  (Key, NewValue, OldValue) when is_list(NewValue) ->
                        case io_lib:printable_list(NewValue) of
                            true when NewValue =:= [] ->
                                case io_lib:printable_list(OldValue) of
@@ -123,7 +125,8 @@ merge_opts(NewOpts, OldOpts) ->
                            true ->
                                NewValue;
                            false ->
-                               rebar_utils:tup_umerge(NewValue, OldValue)
+                              io:format("12312441231 ~n~p~n~p~n~p~n", [Key, NewValue, OldValue]),
+                              rebar_utils:tup_umerge(NewValue, OldValue)
                        end;
                   (_Key, NewValue, _OldValue) ->
                        NewValue

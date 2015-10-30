@@ -87,6 +87,7 @@ simple_compile_wrapper(Source, Target, Compile3Fn, Config, true) ->
         true ->
             Compile3Fn(Source, Target, Config);
         false ->
+            io:format("Skipped b/c Target: ~p~nSource: ~p~n", [Target, Source]),
             skipped
     end.
 

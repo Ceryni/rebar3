@@ -102,6 +102,7 @@ handle_profile(Profile, Name, AppInfo, State) ->
     TopLevelProfileDeps = rebar_state:get(State, {deps, Profile}, []),
     AppProfileDeps = rebar_app_info:get(AppInfo, {deps, Profile}, []),
     AppProfileDeps2 = rebar_utils:tup_dedup(AppProfileDeps),
+    io:format("aodijfoadsf ~n~p~n~p~n", [TopLevelProfileDeps, AppProfileDeps2]),
     ProfileDeps2 = rebar_utils:tup_dedup(rebar_utils:tup_umerge(TopLevelProfileDeps
                                                                ,AppProfileDeps2)),
     State1 = rebar_state:set(State, {deps, Profile}, ProfileDeps2),

@@ -234,6 +234,7 @@ deps_to_binary([Name | T]) ->
     [ec_cnv:to_binary(Name) | deps_to_binary(T)].
 
 tup_dedup(List) ->
+    io:format("aoidsjgioasdfioasdfaiosdjfj~n~p~n", [List]),
     tup_dedup_(tup_sort(List)).
 
 tup_dedup_([]) ->
@@ -265,6 +266,7 @@ tup_dedup_([A|T]) ->
 %%
 %% These properties let us merge proplists fairly easily.
 tup_sort(List) ->
+    % io:format("1112333334445555~n~p~n", [List]),
     lists:sort(fun(A, B) when is_tuple(A), is_tuple(B) -> element(1, A) =< element(1, B)
                ;  (A, B) when is_tuple(A) -> element(1, A) =< B
                ;  (A, B) when is_tuple(B) -> A =< element(1, B)
@@ -279,6 +281,7 @@ tup_sort(List) ->
 %% This lets us apply proper overrides to list of elements according to profile
 %% priority. This function depends on a stable proplist sort.
 tup_umerge(NewList, OldList) ->
+    io:format("1112333334445555666666~n~p~n~p~n", [NewList, OldList]),
     tup_umerge_(tup_sort(NewList), tup_sort(OldList)).
 
 tup_umerge_([], Olds) ->

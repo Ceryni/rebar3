@@ -112,11 +112,16 @@ compile(AppInfo, CompileOpts) when element(1, AppInfo) == app_info_t ->
                                          || File <- rebar_opts:get(RebarOpts, yrl_first_files, [])]),
                             filename:join(Dir, "src"), ".yrl", filename:join(Dir, "src"), ".erl",
                             fun compile_yrl/3),
+        io:format("~p", [rebar_opts:get(RebarOpts, mib_first_files, [])]),
     rebar_base_compiler:run(RebarOpts,
-                            check_files([filename:join(Dir, File)
+                            check_files([filename:join(Dir, File) %Firstfiles
                                          || File <- rebar_opts:get(RebarOpts, mib_first_files, [])]),
-                            filename:join(Dir, "mibs"), ".mib", filename:join([Dir, "priv", "mibs"]), ".bin",
-                            fun compile_mib/3),
+                            filename:join(Dir, "mibs"),
+                            ".mib",
+                            filename:join([Dir, "priv", "mibs"]),
+                            ".bin",
+                            fun compile_mib/3
+                                ),
 
     SrcDirs = lists:map(fun(SrcDir) -> filename:join(Dir, SrcDir) end,
                         rebar_dir:src_dirs(RebarOpts, ["src"])),
@@ -190,7 +195,7 @@ compile_dirs(State, BaseDir, Dirs, OutDir, CompileOpts) when element(1, State) =
     compile_dirs(rebar_state:opts(State), BaseDir, Dirs, OutDir, CompileOpts);
 compile_dirs(RebarOpts, BaseDir, SrcDirs, OutDir, Opts) ->
     CompileOpts = parse_opts(Opts),
-  
+
     ErlOpts = rebar_opts:erl_opts(RebarOpts),
     ?DEBUG("erlopts ~p", [ErlOpts]),
     Recursive = CompileOpts#compile_opts.recursive,
@@ -273,7 +278,7 @@ gather_src(Dirs, Recursive) ->
 gather_src([], Srcs, _Recursive) -> Srcs;
 gather_src([Dir|Rest], Srcs, Recursive) ->
     gather_src(Rest, Srcs ++ rebar_utils:find_files(Dir, ?RE_PREFIX".*\\.erl\$", Recursive), Recursive).
-    
+
 %% Get files which need to be compiled first, i.e. those specified in erl_first_files
 %% and parse_transform options.  Also produce specific erl_opts for these first
 %% files, so that yet to be compiled parse transformations are excluded from it.
@@ -520,8 +525,13 @@ target_base(OutDir, Source) ->
                   rebar_dict()) -> 'ok'.
 compile_mib(Source, Target, Opts) ->
     Dir = filename:dirname(Target),
+    io:format("Dir: ~p~n", [Dir]),
     ok = filelib:ensure_dir(Target),
-    ok = filelib:ensure_dir(filename:join([Dir, "include", "dummy.hrl"])),
+    ProjectDir = filename:dirname(filename:dirname(Source)),
+    IncludeDir = filename:join([ProjectDir, "include"]),
+
+    ok = filelib:ensure_dir(IncludeDir),
+
     AllOpts = [{outdir, Dir}
               ,{i, [Dir]}] ++
         rebar_opts:get(Opts, mib_opts, []),
@@ -538,7 +548,7 @@ compile_mib(Source, Target, Opts) ->
                 end,
             ok = snmpc:mib_to_hrl(Mib, Mib, MibToHrlOpts),
             Hrl_filename = Mib ++ ".hrl",
-            rebar_file_utils:mv(Hrl_filename, "include"),
+            rebar_file_utils:mv(Hrl_filename, IncludeDir),
             ok;
         {error, compilation_failed} ->
             ?FAIL
