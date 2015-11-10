@@ -521,7 +521,10 @@ target_base(OutDir, Source) ->
 compile_mib(Source, Target, Opts) ->
     Dir = filename:dirname(Target),
     ok = filelib:ensure_dir(Target),
-    ok = filelib:ensure_dir(filename:join([Dir, "include", "dummy.hrl"])),
+    ?DEBUG("~nSource: ~p~nDirname: ~p~nDirNameDirName: ~p~n", [Source, filename:dirname(Source), filename:dirname(filename:dirname(Source))]),
+    ProjectDir = filename:dirname(filename:dirname(Source)),
+    IncludeDir = filename:join([ProjectDir, "include"]),
+    ok = filelib:ensure_dir(IncludeDir),
     AllOpts = [{outdir, Dir}
               ,{i, [Dir]}] ++
         rebar_opts:get(Opts, mib_opts, []),
@@ -538,7 +541,7 @@ compile_mib(Source, Target, Opts) ->
                 end,
             ok = snmpc:mib_to_hrl(Mib, Mib, MibToHrlOpts),
             Hrl_filename = Mib ++ ".hrl",
-            rebar_file_utils:mv(Hrl_filename, "include"),
+            rebar_file_utils:mv(Hrl_filename, IncludeDir),
             ok;
         {error, compilation_failed} ->
             ?FAIL
